@@ -6,7 +6,7 @@
 (*   By: niccheva <niccheva@student.42.fr>          +#+  +:+       +#+        *)
 (*                                                +#+#+#+#+#+   +#+           *)
 (*   Created: 2015/06/27 11:27:36 by niccheva          #+#    #+#             *)
-(*   Updated: 2015/06/27 18:58:00 by jerdubos         ###   ########.fr       *)
+(*   Updated: 2015/06/27 19:15:02 by jerdubos         ###   ########.fr       *)
 (*                                                                            *)
 (* ************************************************************************** *)
 (*
@@ -74,7 +74,7 @@ let () =
   let fond = Sdlloader.load_image "fond.jpg" in
   let sam = Sdlloader.load_image "sam.png" in
   let position_of_fond = Sdlvideo.rect 0 0 1920 1080 in
-  let position_of_sam = Sdlvideo.rect 735 315 1920 1080 in (*************************************************)
+  let position_of_sam = Sdlvideo.rect 735 315 1920 1080 in
   Sdlvideo.blit_surface ~dst_rect:position_of_fond ~src:fond ~dst:screen ();
   Sdlvideo.blit_surface ~dst_rect:position_of_sam ~src:sam ~dst:screen ();
   let font = Sdlttf.open_font "arial.ttf" 24 in
