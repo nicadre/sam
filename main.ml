@@ -6,7 +6,7 @@
 (*   By: niccheva <niccheva@student.42.fr>          +#+  +:+       +#+        *)
 (*                                                +#+#+#+#+#+   +#+           *)
 (*   Created: 2015/06/27 11:27:36 by niccheva          #+#    #+#             *)
-(*   Updated: 2015/06/27 21:20:04 by jerdubos         ###   ########.fr       *)
+(*   Updated: 2015/06/28 12:22:21 by niccheva         ###   ########.fr       *)
 (*                                                                            *)
 (* ************************************************************************** *)
 (*
@@ -116,6 +116,12 @@ object (self)
 	  | _ -> {< health = self#health; energy = self#energy; hygiene = self#hygiene; happiness = self#happiness >}
 end
 
+let rec timer_loop (flag, callback) =
+  if !flag then
+	Thread.exit
+  else
+	(Thread.delay 1.; callback (); (timer_loop (flag, callback)))
+
 let () =
   Sdl.init [`VIDEO];
   at_exit Sdl.quit;
@@ -128,6 +134,9 @@ let () =
   let position_of_sam = Sdlvideo.rect 735 315 1920 1080 in
   Sdlvideo.blit_surface ~dst_rect:position_of_fond ~src:fond ~dst:screen ();
   Sdlvideo.blit_surface ~dst_rect:position_of_sam ~src:sam ~dst:screen ();
+  let timer_flag = ref false in
+  let timer_cb () = Sdlevent.add [Sdlevent.USER 0] in
+  let timer_thread = Thread.create timer_loop (timer_flag, timer_cb) in
   let font = Sdlttf.open_font "arial.ttf" 24 in
   let eat = new eat_button screen "EAT" 585 900 font (Int32.of_string "0xFF00FF00") Sdlvideo.cyan in
   let thunder = new thunder_button screen "THUNDER" 785 900 font (Int32.of_string "0xFF00FF00") Sdlvideo.cyan in
@@ -141,14 +150,17 @@ let () =
   samrows#draw screen 485 200 font (Int32.of_string "0x0000FF00") (Sdlvideo.red);
   let rec wait_for_escape () =
 	match Sdlevent.wait_event () with
-	  | Sdlevent.KEYDOWN { Sdlevent.keysym = Sdlkey.KEY_ESCAPE } -> print_endline "Bye."
-	  | Sdlevent.MOUSEBUTTONDOWN ({ Sdlevent.mbe_button = Sdlmouse.BUTTON_LEFT } as c) when (c.mbe_x >= eat#x && c.mbe_x <= eat#x + 150 && c.mbe_y >= eat#y && c.mbe_y <= eat#y + 80) -> eat#onclick ; wait_for_escape ()
-	  | Sdlevent.MOUSEBUTTONDOWN ({ Sdlevent.mbe_button = Sdlmouse.BUTTON_LEFT } as c) when (c.mbe_x >= thunder#x && c.mbe_x <= thunder#x + 150 && c.mbe_y >= thunder#y && c.mbe_y <= thunder#y + 80) -> thunder#onclick ; wait_for_escape ()
-	  | Sdlevent.MOUSEBUTTONDOWN ({ Sdlevent.mbe_button = Sdlmouse.BUTTON_LEFT } as c) when (c.mbe_x >= bath#x && c.mbe_x <= bath#x + 150 && c.mbe_y >= bath#y && c.mbe_y <= bath#y + 80) -> bath#onclick ; wait_for_escape ()
-	  | Sdlevent.MOUSEBUTTONDOWN ({ Sdlevent.mbe_button = Sdlmouse.BUTTON_LEFT } as c) when (c.mbe_x >= kill#x && c.mbe_x <= kill#x + 150 && c.mbe_y >= kill#y && c.mbe_y <= kill#y + 80) -> kill#onclick ; wait_for_escape ()
-	  | Sdlevent.MOUSEBUTTONUP { Sdlevent.mbe_button = Sdlmouse.BUTTON_LEFT } -> eat#draw ; thunder#draw ; bath#draw ; kill#draw ; print_endline "draw" ; wait_for_escape ()
-	  | event -> print_endline (Sdlevent.string_of_event event);
-		wait_for_escape ()
+	| Sdlevent.KEYDOWN { Sdlevent.keysym = Sdlkey.KEY_ESCAPE } -> print_endline "Bye."
+	| Sdlevent.MOUSEBUTTONDOWN ({ Sdlevent.mbe_button = Sdlmouse.BUTTON_LEFT } as c) when (c.mbe_x >= eat#x && c.mbe_x <= eat#x + 150 && c.mbe_y >= eat#y && c.mbe_y <= eat#y + 80) -> eat#onclick ; wait_for_escape ()
+	| Sdlevent.MOUSEBUTTONDOWN ({ Sdlevent.mbe_button = Sdlmouse.BUTTON_LEFT } as c) when (c.mbe_x >= thunder#x && c.mbe_x <= thunder#x + 150 && c.mbe_y >= thunder#y && c.mbe_y <= thunder#y + 80) -> thunder#onclick ; wait_for_escape ()
+	| Sdlevent.MOUSEBUTTONDOWN ({ Sdlevent.mbe_button = Sdlmouse.BUTTON_LEFT } as c) when (c.mbe_x >= bath#x && c.mbe_x <= bath#x + 150 && c.mbe_y >= bath#y && c.mbe_y <= bath#y + 80) -> bath#onclick ; wait_for_escape ()
+	| Sdlevent.MOUSEBUTTONDOWN ({ Sdlevent.mbe_button = Sdlmouse.BUTTON_LEFT } as c) when (c.mbe_x >= kill#x && c.mbe_x <= kill#x + 150 && c.mbe_y >= kill#y && c.mbe_y <= kill#y + 80) -> kill#onclick ; wait_for_escape ()
+	| Sdlevent.MOUSEBUTTONUP { Sdlevent.mbe_button = Sdlmouse.BUTTON_LEFT } -> eat#draw ; thunder#draw ; bath#draw ; kill#draw ; print_endline "draw" ; wait_for_escape ()
+	| Sdlevent.USER 0 -> print_endline "SAM NE MEURT JAMAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAIS !!"; wait_for_escape ()
+	| event -> print_endline (Sdlevent.string_of_event event);
+			   wait_for_escape ()
   in
-  wait_for_escape ()
+  wait_for_escape ();
+  timer_flag := true;
+  Thread.join timer_thread
 (*  Sdltimer.delay 3000*)
