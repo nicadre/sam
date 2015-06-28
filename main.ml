@@ -6,7 +6,7 @@
 (*   By: niccheva <niccheva@student.42.fr>          +#+  +:+       +#+        *)
 (*                                                +#+#+#+#+#+   +#+           *)
 (*   Created: 2015/06/27 11:27:36 by niccheva          #+#    #+#             *)
-(*   Updated: 2015/06/28 19:08:22 by jerdubos         ###   ########.fr       *)
+(*   Updated: 2015/06/28 19:25:31 by jerdubos         ###   ########.fr       *)
 (*                                                                            *)
 (* ************************************************************************** *)
 
@@ -74,31 +74,31 @@ object (self)
   method hygiene = hygiene
   method happiness = happiness
 
-  method private draw_health screen x y font color tcolor =
-	Sdlvideo.fill_rect ~rect:(Sdlvideo.rect x y (self#health * 2) 30) screen color ;
-	let text = Sdlttf.render_text_solid font "Health" ~fg:tcolor in
-	Sdlvideo.blit_surface ~dst_rect:(Sdlvideo.rect (x + ((200 - (fst (Sdlttf.size_text font "Health"))) / 2)) (y - 30) 200 30) ~src:text ~dst:screen ()
+  method private draw_health screen x y font =
+	Sdlvideo.fill_rect ~rect:(Sdlvideo.rect x y (self#health * 2) 30) screen (Int32.of_string "0x00FF0000") ;
+	let text = Sdlttf.render_text_solid font ("Health : " ^ string_of_int self#health) ~fg:Sdlvideo.green in
+	Sdlvideo.blit_surface ~dst_rect:(Sdlvideo.rect (x + ((200 - (fst (Sdlttf.size_text font ("Health : " ^ string_of_int self#health)))) / 2)) (y - 30) 200 30) ~src:text ~dst:screen ()
 
-  method private draw_energy screen x y font color tcolor =
-	Sdlvideo.fill_rect ~rect:(Sdlvideo.rect x y (self#energy * 2) 30) screen color ;
-	let text = Sdlttf.render_text_solid font "Energy" ~fg:tcolor in
-	Sdlvideo.blit_surface ~dst_rect:(Sdlvideo.rect (x + ((200 - (fst (Sdlttf.size_text font "Energy"))) / 2)) (y - 30) 200 30) ~src:text ~dst:screen ()
+  method private draw_energy screen x y font =
+	Sdlvideo.fill_rect ~rect:(Sdlvideo.rect x y (self#energy * 2) 30) screen (Int32.of_string "0x00FFFF00") ;
+	let text = Sdlttf.render_text_solid font ("Energy : " ^ string_of_int self#energy) ~fg:Sdlvideo.yellow in
+	Sdlvideo.blit_surface ~dst_rect:(Sdlvideo.rect (x + ((200 - (fst (Sdlttf.size_text font ("Energy : " ^ string_of_int self#energy)))) / 2)) (y - 30) 200 30) ~src:text ~dst:screen ()
 
-  method private draw_hygiene screen x y font color tcolor =
-	Sdlvideo.fill_rect ~rect:(Sdlvideo.rect x y (self#hygiene * 2) 30) screen color ;
-	let text = Sdlttf.render_text_solid font "Hygiene" ~fg:tcolor in
-	Sdlvideo.blit_surface ~dst_rect:(Sdlvideo.rect (x + ((200 - (fst (Sdlttf.size_text font "Hygiene"))) / 2)) (y - 30) 200 30) ~src:text ~dst:screen ()
+  method private draw_hygiene screen x y font =
+	Sdlvideo.fill_rect ~rect:(Sdlvideo.rect x y (self#hygiene * 2) 30) screen (Int32.of_string "0xFFFF0000") ;
+	let text = Sdlttf.render_text_solid font ("Hygiene : " ^ string_of_int self#hygiene) ~fg:Sdlvideo.cyan in
+	Sdlvideo.blit_surface ~dst_rect:(Sdlvideo.rect (x + ((200 - (fst (Sdlttf.size_text font ("Hygiene : " ^ string_of_int self#hygiene)))) / 2)) (y - 30) 200 30) ~src:text ~dst:screen ()
 
-  method private draw_happiness screen x y font color tcolor =
-	Sdlvideo.fill_rect ~rect:(Sdlvideo.rect x y (self#happiness * 2) 30) screen color ;
-	let text = Sdlttf.render_text_solid font "Happiness" ~fg:tcolor in
-	Sdlvideo.blit_surface ~dst_rect:(Sdlvideo.rect (x + ((200 - (fst (Sdlttf.size_text font "Happiness"))) / 2)) (y - 30) 200 30) ~src:text ~dst:screen ()
+  method private draw_happiness screen x y font =
+	Sdlvideo.fill_rect ~rect:(Sdlvideo.rect x y (self#happiness * 2) 30) screen (Int32.of_string "0x0000FF00") ;
+	let text = Sdlttf.render_text_solid font ("Happiness : " ^ string_of_int self#happiness) ~fg:Sdlvideo.red in
+	Sdlvideo.blit_surface ~dst_rect:(Sdlvideo.rect (x + ((200 - (fst (Sdlttf.size_text font ("Happiness : " ^ string_of_int self#happiness)))) / 2)) (y - 30) 200 30) ~src:text ~dst:screen ()
 
-  method draw screen x y font color tcolor =
-	self#draw_health screen x y font color tcolor;
-	self#draw_energy screen (x + 250) y font color tcolor;
-	self#draw_hygiene screen (x + 500) y font color tcolor;
-	self#draw_happiness screen (x + 750) y font color tcolor;
+  method draw screen x y font =
+	self#draw_health screen x y font ;
+	self#draw_energy screen (x + 250) y font ;
+	self#draw_hygiene screen (x + 500) y font ;
+	self#draw_happiness screen (x + 750) y font ;
 	Sdlvideo.flip screen
 
   method action (button:button) sound = print_endline "sam does a barrel roll" ; button#onclick ; button#action sound;
@@ -167,7 +167,7 @@ let () =
 		bath#draw;
 		kill#draw;
 		if b then button#onclick;
-		sam#draw screen 485 200 font (Int32.of_string "0x0000FF00") (Sdlvideo.red)
+		sam#draw screen 485 200 font
 	  in
 	  let save sam =
 		let fout = open_out "save.itama" in
